@@ -32,21 +32,17 @@ def retrieve_student(id):
 # Update a student with a matching ID
 def update_student(id, student_data):
     # Build update query using $set operator for selective updates
-    update_query = {"$set": {}}
+    update_query={"$set": {}}
     if student_data.name is not None:
         update_query["$set"]["name"] = student_data.name
-    
     if student_data.age is not None:
         update_query["$set"]["age"] = student_data.age
-    
+
     if student_data.address is not None:
-        # Handle nested address updates
-        address_update = {}
         if student_data.address.city is not None:
-            address_update["city"] = student_data.address.city
+            update_query["$set"]["address.city"] = student_data.address.city
         if student_data.address.country is not None:
-            address_update["country"] = student_data.address.country
-        update_query["$set"]["address"] = address_update
+            update_query["$set"]["address.country"] = student_data.address.country
 
     # Update the student document
     db.students_collection.update_one({"_id": ObjectId(id)}, update_query)
@@ -57,6 +53,6 @@ def update_student(id, student_data):
 # Delete a student from the database
 def delete_student(id):
     # Find students matching the filter criteria
-    db.students_collection.delete_one({"_id":ObjectId(id),})
+    db.students_collection.delete_one({"_id":ObjectId(id)})
     
     return {}
