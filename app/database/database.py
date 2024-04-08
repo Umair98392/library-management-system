@@ -1,12 +1,16 @@
+import os
+from dotenv import load_dotenv
 from pymongo import MongoClient
 
+load_dotenv()
+
 # MongoDB connection URL
-MONGO_URI = "mongodb+srv://user_12:BxE0Lsr4ZOfIpvU4@cluster0.oavbqcz.mongodb.net/"
+MONGO_URI = os.getenv("MONGO_URI")
 
 client = MongoClient(MONGO_URI)
 
 # Database Access 
-database = client.umair_db
+database = client.Library_db
 
 # Collection in Database
 students_collection = database.students
