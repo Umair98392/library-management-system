@@ -4,7 +4,7 @@ from app.routers import students
 app = FastAPI()
 
 # Include routers
-app.include_router(students.router,tags=["students"])
+app.include_router(students.router)
 
 
 if __name__ == "__main__":

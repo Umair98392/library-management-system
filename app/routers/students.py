@@ -13,7 +13,7 @@ router = APIRouter()
         response_model=StudentId, 
         response_description="A JSON response sending back the ID of the newly created student record."
 )
-def add_student_data(student_data: StudentSchema):
+def add_student_data(student_data: StudentSchema|None=None):
 
     return {"id": add_student(student_data)}
 
@@ -48,7 +48,7 @@ def get_student_data(id: str = Path(description="The ID of the student previousl
 @router.patch(
     "/students/{id}",
     summary="Update student",
-    description="API to update student properties based on provided information. Only fields sent in the request body will be updated.",
+    description="API to update the student's properties based on information provided. Not mandatory that all information would be sent in PATCH, only what fields are sent should be updated in the Database.",
     status_code=204,
     response_description= "No content"
 )
