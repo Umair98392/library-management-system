@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management Interface</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 1.5rem;
+        }
+        .container {
+            width: 80%;
+            margin: 2rem auto;
+            padding: 2rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            color: #4CAF50;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 0.75rem 1.5rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        /* Modal styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            padding-top: 100px; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.5); 
+        }
+        .modal-content {
+            background-color: white;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            border-radius: 10px;
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin-top: 1.5rem;
+        }
+    </style>
+    <script>
+        function showModal(content = '', isLoading = false) {
+            const modal = document.getElementById('resultModal');
+            const modalContent = document.getElementById('modalContent');
+            if (isLoading) {
+                modalContent.innerHTML = '<div class="spinner"></div><p>Loading...</p>';
+            } else {
+                modalContent.innerHTML = content;
+            }
+            modal.style.display = "block";
+        }
+
+        async function createStudent() {
+            showModal('', true); // Show loading modal
+            const name = document.getElementById('name').value;
+            const age = parseInt(document.getElementById('age').value); // Ensure age is a number
+            const city = document.getElementById('city').value; // Collect city input
+            const country = document.getElementById('country').value; // Collect country input
+
+            try {
+                const response = await fetch("/students", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name,
+                        age,
+                        address: { city, country } // Nested address object
+                    })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showModal('Student Created with ID: ' + result.id);
+                } else {
+                    showModal('Failed to create student: ' + response.statusText);
+                }
+            } catch (error) {
+                showModal('Error: ' + error.message);
+            }
+        }
+
+        async function listStudents() {
+            showModal('', true); // Show loading modal
+            const country = document.getElementById('filterCountry').value;
+            const age = document.getElementById('filterAge').value;
+
+            const queryParams = new URLSearchParams();
+            if (country) queryParams.append('country', country);
+            if (age) queryParams.append('age', age);
+
+            try {
+                const response = await fetch(`/students?${queryParams.toString()}`, {
+                    method: "GET"
+                });
+
+                const data = await response.json();
+                showModal('Student List: ' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                showModal('Error: ' + error.message);
+            }
+        }
+
+        async function fetchStudent() {
+            showModal('', true); // Show loading modal
+            const studentId = document.getElementById('fetchStudentId').value;
+
+            try {
+                const response = await fetch(`/students/${studentId}`, {
+                    method: "GET"
+                });
+
+                const data = await response.json();
+                showModal('Student Data: ' + JSON.stringify(data, null, 2));
+            } catch (error) {
+                showModal('Error: ' + error.message);
+            }
+        }
+
+        async function updateStudent() {
+            showModal('', true); // Show loading modal
+            const studentId = document.getElementById('updateStudentId').value;
+            const name = document.getElementById('updateName').value;
+            const age = parseInt(document.getElementById('updateAge').value); // Ensure age is a number
+            const city = document.getElementById('updateCity').value; // Collect city input
+            const country = document.getElementById('updateCountry').value; // Collect country input
+
+            try {
+                const response = await fetch(`/students/${studentId}`, {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        name,
+                        age,
+                        address: { city, country } // Nested address object
+                    })
+                });
+
+                if (response.ok) {
+                    showModal('Student updated successfully');
+                } else {
+                    showModal('Failed to update student: ' + response.statusText);
+                }
+            } catch (error) {
+                showModal('Error: ' + error.message);
+            }
+        }
+
+        async function deleteStudent() {
+            showModal('', true); // Show loading modal
+            const studentId = document.getElementById('deleteStudentId').value;
+
+            try {
+                const response = await fetch(`/students/${studentId}`, {
+                    method: "DELETE"
+                });
+
+                if (response.ok) {
+                    showModal('Student deleted successfully');
+                } else {
+                    showModal('Failed to delete student: ' + response.statusText);
+                }
+            } catch (error) {
+                showModal('Error: ' + error.message);
+            }
+        }
+
+        // Close modal when the user clicks on the X
+        function closeModal() {
+            document.getElementById('resultModal').style.display = "none";
+        }
+    </script>
+</head>
+<body>
+    <header>
+        <h1>Student Management Interface</h1>
+        <p>Use the forms below to interact with the Student Management API</p>
+    </header>
+
+    <div class="container">
+        <!-- Forms to interact with API (Same as previous) -->
+
+        <h2>Create a New Student</h2>
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input type="text" id="name" placeholder="Enter student name">
+        </div>
+        <div class="form-group">
+            <label for="age">Age</label>
+            <input type="number" id="age" placeholder="Enter student age">
+        </div>
+        <div class="form-group">
+            <label for="city">City</label>
+            <input type="text" id="city" placeholder="Enter student city">
+        </div>
+        <div class="form-group">
+            <label for="country">Country</label>
+            <input type="text" id="country" placeholder="Enter student country">
+        </div>
+        <button onclick="createStudent()">Create Student</button>
+
+        <h2>List Students (Optional Filters)</h2>
+        <div class="form-group">
+            <label for="filterCountry">Filter by Country</label>
+            <input type="text" id="filterCountry" placeholder="Enter country filter">
+        </div>
+        <div class="form-group">
+            <label for="filterAge">Filter by Age</label>
+            <input type="number" id="filterAge" placeholder="Enter age filter">
+        </div>
+        <button onclick="listStudents()">List Students</button>
+
+        <h2>Fetch a Student by ID</h2>
+        <div class="form-group">
+            <label for="fetchStudentId">Student ID</label>
+            <input type="text" id="fetchStudentId" placeholder="Enter student ID">
+        </div>
+        <button onclick="fetchStudent()">Fetch Student</button>
+
+        <h2>Update a Student</h2>
+        <div class="form-group">
+            <label for="updateStudentId">Student ID</label>
+            <input type="text" id="updateStudentId" placeholder="Enter student ID">
+        </div>
+        <div class="form-group">
+            <label for="updateName">Name</label>
+            <input type="text" id="updateName" placeholder="Enter new name">
+        </div>
+        <div class="form-group">
+            <label for="updateAge">Age</label>
+            <input type="number" id="updateAge" placeholder="Enter new age">
+        </div>
+        <div class="form-group">
+            <label for="updateCity">City</label>
+            <input type="text" id="updateCity" placeholder="Enter new city">
+        </div>
+        <div class="form-group">
+            <label for="updateCountry">Country</label>
+            <input type="text" id="updateCountry" placeholder="Enter new country">
+        </div>
+        <button onclick="updateStudent()">Update Student</button>
+
+        <h2>Delete a Student</h2>
+        <div class="form-group">
+            <label for="deleteStudentId">Student ID</label>
+            <input type="text" id="deleteStudentId" placeholder="Enter student ID">
+        </div>
+        <button onclick="deleteStudent()">Delete Student</button>
+
+        <div class="result" id="result"></div>
+
+        <!-- Result Modal -->
+        <div id="resultModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <pre id="modalContent"></pre>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
