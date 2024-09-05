@@ -19,7 +19,7 @@ def retrieve_students(country,age):
     students = db.students_collection.find(filter_query)
 
     # Convert cursor object to a list of dictionaries
-    students_list = [{"name": student['name'], "age": student['age']} for student in students]
+    students_list = [{"id": str(student['_id']), "name": student['name'], "age": student['age']} for student in students]
 
     return students_list
 
