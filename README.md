@@ -97,7 +97,7 @@ This project implements a Library Management System using FastAPI for building R
 
 6. Run the FastAPI application:
     ```bash
-    uvicorn main:app --reload
+    uvicorn app:app --reload
     ```
 
 ### Testing the APIs
