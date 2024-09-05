@@ -26,6 +26,7 @@ class StudentUpdate(BaseModel):
 
 
 class Student(BaseModel):
+    id:str
     name: str
     age: int
 
